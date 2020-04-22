@@ -1,6 +1,6 @@
 ![logo](https://raw.githubusercontent.com/MISP/MISP-maltego/master/doc/logo.png)
 # Quick start guide
-This is a [Maltego](https://www.paterva.com/web7/) [MISP](https://www.misp-project.org) integration tool allowing you to view (read-only) data from a MISP instance. 
+This is a [Maltego](https://www.paterva.com/web7/) [MISP](https://www.misp-project.org) integration tool allowing you to view (read-only) data from a MISP instance.
 
 It also allows browsing through the [MITRE ATT&CK](https://attack.mitre.org/) entities.
 
@@ -10,6 +10,7 @@ Once installed you can start by creating a `MISPEvent` entity, then load the Mac
 
 Alternatively initiate a transform on an existing Maltego entity.
 The currently supported entities are: `AS`, `DNSName`, `Domain`, `EmailAddress`, `File`, `Hash`, `IPv4Address`, `NSRecord`, `Person`, `PhoneNumber`, `URL`, `Website`
+Also added functionality to upload attributes back to MISP. However, you need to add Property field "EventID" to all Maltego entities, that needs to be uploaded. This is due to the fact, that script needs to know to which Event the attributes should be uploaded.
 
 
 ## Installation and User Guide:
