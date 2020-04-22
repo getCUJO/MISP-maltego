@@ -1,8 +1,9 @@
 from canari.maltego.entities import Unknown
 from canari.maltego.transform import Transform
-# from canari.framework import EnableDebugWindow
-from MISP_maltego.transforms.common.util import check_update, get_misp_connection, event_to_entity, object_to_entity, get_attribute_in_event, get_attribute_in_object, attribute_to_entity, get_entity_property
-from canari.maltego.message import LinkDirection
+from canari.framework import EnableDebugWindow
+from MISP_maltego.transforms.common.util import check_update, get_misp_connection, event_to_entity, object_to_entity, \
+    get_attribute_in_event, get_attribute_in_object, attribute_to_entity, get_entity_property
+from canari.maltego.message import UIMessageType, UIMessage, LinkDirection
 
 __author__ = 'Christophe Vandeplas'
 __copyright__ = 'Copyright 2018, MISP_maltego Project'
@@ -43,6 +44,45 @@ class AttributeInMISP(Transform):
         return response
 
 
+#@EnableDebugWindow
+class addToEvent(Transform):
+    """Add attribute to MISP Event"""
+    input_type = Unknown
+    display_name = 'addToEvent'
+    remote = True
+
+    def do_transform(self, request, response, config):
+        response += check_update(config)
+        maltego_misp_attribute = request.entity
+        # skip MISP Events (value = int)
+        try:
+            int(maltego_misp_attribute.value)
+            return response
+        except Exception:
+            pass
+        # Check if valid MISP ID is specified
+        if not 'EventID' in maltego_misp_attribute.fields:
+            response += UIMessage("Error: Add MISP EventID Property 'EventID' to Maltego Entity!",
+                                  type=UIMessageType.Fatal)
+            return response
+
+        elif int(maltego_misp_attribute.fields['EventID'].value) == 0:
+            response += UIMessage("Error: Enter MISP EventID to Property 'EventID' of Maltego Entity!",
+                                  type=UIMessageType.Fatal)
+            return response
+        eventID = maltego_misp_attribute.fields['EventID'].value
+        misp = get_misp_connection(config, request.parameters)
+        JSON_resp = misp.freetext(eventID, maltego_misp_attribute.value, adhereToWarninglists=True, distribution=0, returnMetaAttributes=False,
+pythonify=True,)
+        if 'errors' in JSON_resp:
+            if JSON_resp['errors'][0] == 403:
+                error_response = JSON_resp['errors'][1]
+                if not error_response['saved']:
+                    error_reason = error_response['errors']['value'][0]
+                    response += UIMessage("Error: %s" % error_reason, type=UIMessageType.Fatal)
+        return response
+
+# and JSON_resp['Attribute']['value'] == maltego_misp_attribute.value
 # placeholder for https://github.com/MISP/MISP-maltego/issues/11
 # waiting for support of CIDR search through the REST API
 # @EnableDebugWindow
@@ -64,7 +104,6 @@ class AttributeInMISP(Transform):
 #             attr_json = misp.search(controller='attributes', value=str(cidr), with_attachments=False)
 #             print(attr_json)
 #         return response
-
 
 # @EnableDebugWindow
 class AttributeToEvent(Transform):
@@ -97,7 +136,8 @@ class AttributeToEvent(Transform):
         # from Object
         elif 'properties.mispobject' in request.entity.fields:
             if request.entity.fields.get('event_id'):
-                events_json = misp.search(controller='events', eventid=request.entity.fields.get('event_id').value, with_attachments=False)
+                events_json = misp.search(controller='events', eventid=request.entity.fields.get('event_id').value,
+                                          with_attachments=False)
                 for e in events_json:
                     response += event_to_entity(e, link_direction=LinkDirection.OutputToInput)
                 return response
