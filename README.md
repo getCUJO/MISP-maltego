@@ -10,6 +10,7 @@ Once installed you can start by creating a `MISPEvent` entity, then load the Mac
 
 Alternatively initiate a transform on an existing Maltego entity.
 The currently supported entities are: `AS`, `DNSName`, `Domain`, `EmailAddress`, `File`, `Hash`, `IPv4Address`, `NSRecord`, `Person`, `PhoneNumber`, `URL`, `Website`
+
 Also added functionality to upload attributes back to MISP. However, you need to add Property field "EventID" to all Maltego entities, that needs to be uploaded. This is due to the fact, that script needs to know to which Event the attributes should be uploaded.
 
 
