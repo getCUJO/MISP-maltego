@@ -360,14 +360,14 @@ def galaxycluster_to_entity(c, link_label=None, link_direction=LinkDirection.Inp
     # map the 'icon' name from the cluster to the icon filename of the intelligence-icons repository
     try:
         icon_url = mapping_galaxy_icon[galaxy_cluster['icon']]
-    except KeyError:
+    except:
         # it's not in our mapping, just ignore and leave the default icon
         icon_url = None
 
     # create the right sub-galaxy: ThreatActor, Software, AttackTechnique, ... or MISPGalaxy
     try:
         galaxy_type = mapping_galaxy_type[galaxy_cluster['type']]
-    except KeyError:
+    except:
         galaxy_type = MISPGalaxy
     return galaxy_type(
         '{}\n{}'.format(c['type'], c['value']),
